@@ -1,0 +1,7 @@
+<resources>
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="window_background">#F6F7FB</color>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#666666</color>
+    <color name="accent">#1677FF</color>
+</resources>
