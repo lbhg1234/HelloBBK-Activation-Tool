@@ -80,14 +80,20 @@ object ActivationGenerator {
         return Result(code, payload, snBytes.size, expiresAtSec, sig.size, check)
     }
 
-    /** 从 CRT 私钥推导公钥（用于自检，无需用户额外提供公钥）。 */
-    fun derivePublic(privateKey: PrivateKey): PublicKey? = try {
-        val crt = privateKey as RSAPrivateCrtKey
-        KeyFactory.getInstance("RSA").generatePublic(
-            RSAPublicKeySpec(crt.modulus, crt.publicExponent)
-        )
-    } catch (e: Exception) {
-        null
+    /**
+     * 从私钥推导公钥（用于自检，无需用户额外提供公钥）。
+     * 标准 CRT 私钥自带 publicExponent；少数私钥只给出 n、d（非 CRT），
+     * 此时用 RSA 通用的 e=65537 兜底，避免把可用私钥误判为 INVALID。
+     */
+    fun derivePublic(privateKey: PrivateKey): PublicKey? {
+        return try {
+            val rsa = privateKey as? java.security.interfaces.RSAPrivateKey ?: return null
+            val e = (privateKey as? RSAPrivateCrtKey)?.publicExponent
+                ?: java.math.BigInteger.valueOf(65537L)
+            KeyFactory.getInstance("RSA").generatePublic(RSAPublicKeySpec(rsa.modulus, e))
+        } catch (e: Exception) {
+            null
+        }
     }
 
     /**

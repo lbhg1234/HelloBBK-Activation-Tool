@@ -164,11 +164,18 @@ class MainActivity : Activity() {
                         true
                     )
                 } else {
-                    Triple(
-                        "",
-                        "✗ 自检未通过（${r.selfCheck}）：私钥结构异常或签名算法不匹配。",
-                        false
-                    )
+                    val crt = key is java.security.interfaces.RSAPrivateCrtKey
+                    val headOk = pem.contains("-----BEGIN") && pem.contains("-----END")
+                    val reason = when (r.selfCheck) {
+                        ActivationGenerator.Verify.EXPIRED ->
+                            "到期时间早于当前时间，请把到期时间调到未来。"
+                        else ->
+                            "工具无法从这份私钥推导出配对公钥并完成回验，通常是私钥不完整或不是标准未加密 RSA 私钥。" +
+                                    "建议用「从文件选择私钥…」载入完整 .pem 文件。" +
+                                    "（诊断：RSA-$bits，${if (crt) "标准 CRT 私钥" else "非 CRT 私钥"}，" +
+                                    "${if (headOk) "PEM 头尾完整" else "PEM 缺少 BEGIN/END 装甲行"}）"
+                    }
+                    Triple("", "✗ 自检未通过（${r.selfCheck}）：$reason", false)
                 }
             } catch (e: Exception) {
                 Triple(

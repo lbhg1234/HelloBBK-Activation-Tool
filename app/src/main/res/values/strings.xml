@@ -19,6 +19,4 @@
     <string name="btn_generate">生成激活码</string>
     <string name="label_result">激活码（Base64URL，可直接输入到宿主激活框）</string>
     <string name="btn_copy">复制激活码</string>
-
-    <string name="note">重要：宿主采用「在线公钥验签」，当前公钥来自 share.weiyun.com/YtHW1ZPF（RSA-4096）。本工具生成的激活码只有在使用「与该公钥配对的私钥」时才能通过宿主验签；若填入其它私钥，请同步把对应公钥更新到该分享页。工具为纯离线运算，不联网、不上传任何密钥。</string>
 </resources>

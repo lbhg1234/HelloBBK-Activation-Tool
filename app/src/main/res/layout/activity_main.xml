@@ -157,14 +157,5 @@
             android:textColor="@color/text_secondary"
             android:paddingTop="12dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/note"
-            android:textSize="12sp"
-            android:textColor="@color/text_secondary"
-            android:paddingTop="20dp"
-            android:lineSpacingExtra="3dp" />
-
     </LinearLayout>
 </ScrollView>
