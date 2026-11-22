@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<android.view.View>(R.id.btnSaveKey).setOnClickListener { saveCurrentKey() }
         findViewById<android.view.View>(R.id.btnDeleteKey).setOnClickListener { deleteSelectedKey() }
         findViewById<android.view.View>(R.id.btnEditKey).setOnClickListener { editSelectedKey() }
+        findViewById<android.view.View>(R.id.btnNewKey).setOnClickListener { newKeyEntry() }
         refreshKeyEditHint()
     }
 
@@ -226,6 +227,17 @@ class MainActivity : AppCompatActivity() {
         val chip = chipKeyStore.findViewById<Chip>(checkedId) ?: return
         val e = entries.firstOrNull { it.id == chip.tag } ?: return
         loadKeyEntry(e)
+    }
+
+    /** 点“新建私钥”：清空输入并退出编辑模式，回到可新增的状态。 */
+    private fun newKeyEntry() {
+        editingId = null
+        etKey.setText("")
+        etKeyName.setText("")
+        etKeyPass.setText("")
+        chipKeyStore.clearCheck()          // 取消 chip 勾选，避免误以为仍选中旧项
+        refreshKeyEditHint()
+        toast("新建模式：填好名称与私钥后点「保存当前私钥」")
     }
 
     /** 根据是否处于编辑模式，更新提示文案与保存按钮文字。 */

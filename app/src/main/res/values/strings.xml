@@ -18,6 +18,7 @@
     <string name="btn_save_key">保存当前私钥</string>
     <string name="btn_update_key">更新当前私钥</string>
     <string name="btn_edit_key">编辑选中</string>
+    <string name="btn_new_key">＋ 新建私钥</string>
     <string name="btn_delete_key">删除选中</string>
     <string name="keystore_empty">（暂无保存的私钥）</string>
     <string name="hint_editing_mode">编辑模式：改名称或私钥后点「更新当前私钥」即可原地保存（支持改名）</string>
