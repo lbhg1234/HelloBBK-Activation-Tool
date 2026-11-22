@@ -1,7 +1,23 @@
 <resources>
+    <!-- 兼容旧引用（mipmap / 图标） -->
     <color name="ic_launcher_background">#FFFFFF</color>
     <color name="window_background">#F6F7FB</color>
     <color name="text_primary">#1A1A1A</color>
     <color name="text_secondary">#666666</color>
     <color name="accent">#1677FF</color>
+
+    <!-- Material 3 配色（基于原品牌蓝的近似 tonal palette） -->
+    <color name="md_primary">#0057D2</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#DCE1FF</color>
+    <color name="md_on_primary_container">#001653</color>
+    <color name="md_secondary">#565E71</color>
+    <color name="md_on_secondary">#FFFFFF</color>
+    <color name="md_secondary_container">#DAE2F9</color>
+    <color name="md_on_secondary_container">#161C2A</color>
+    <color name="md_surface">#F7F8FC</color>
+    <color name="md_surface_variant">#E1E2EC</color>
+    <color name="md_on_surface">#1A1B20</color>
+    <color name="md_on_surface_variant">#44474E</color>
+    <color name="md_error">#B3261E</color>
 </resources>

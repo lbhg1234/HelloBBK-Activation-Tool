@@ -33,6 +33,9 @@ android {
     }
 }
 
-// 零第三方业务依赖：仅 Android framework + Kotlin 标准库 + JDK（java.security / java.util.Base64）。
+// Material 3（Material Components for Android）：AppCompat + Material。
+// 用于 M3 主题与组件；签名/验签核心仍为纯 JDK（java.security / java.util.Base64）。
 dependencies {
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
 }

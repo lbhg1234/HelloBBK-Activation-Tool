@@ -2,21 +2,36 @@
     <string name="app_name">HelloBBK 激活工具</string>
     <string name="subtitle">离线生成激活码 · 自定义 RSA 私钥与到期时间</string>
 
+    <!-- 设备序列号 -->
     <string name="label_sn">设备序列号 SN</string>
-    <string name="hint_sn">输入目标设备的 SN（激活码与 SN 绑定，需与宿主读取到的 SN 完全一致）</string>
+    <string name="hint_sn">输入目标设备的 SN（需与宿主读取到的 SN 完全一致）</string>
 
+    <!-- 私钥 -->
     <string name="label_key">RSA 私钥（PEM）</string>
-    <string name="hint_key">粘贴 PEM 私钥，支持 -----BEGIN PRIVATE KEY-----（PKCS#8）与 -----BEGIN RSA PRIVATE KEY-----（PKCS#1）</string>
-    <string name="btn_load_key">从文件选择私钥…</string>
+    <string name="hint_key">粘贴 PEM 私钥；支持 PKCS#8 / PKCS#1，加密私钥请填写密码</string>
+    <string name="btn_load_key">从文件选择</string>
 
+    <!-- 私钥记忆 -->
+    <string name="label_keystore">私钥记忆</string>
+    <string name="hint_key_name">给这把私钥起个名称（自定义）</string>
+    <string name="hint_key_pass">私钥密码（可选，加密私钥需填）</string>
+    <string name="btn_save_key">保存当前私钥</string>
+    <string name="btn_delete_key">删除选中</string>
+    <string name="keystore_empty">（暂无保存的私钥）</string>
+
+    <!-- 到期时间 -->
     <string name="label_expire">到期时间</string>
+    <string name="btn_now">获取当前时间</string>
     <string name="btn_pick_time">选择日期时间</string>
+    <string name="btn_d2">+2 天</string>
+    <string name="btn_d5">+5 天</string>
+    <string name="btn_d15">+15 天</string>
     <string name="btn_d30">+30 天</string>
-    <string name="btn_d90">+90 天</string>
-    <string name="btn_d365">+1 年</string>
     <string name="btn_long">长期(2100)</string>
 
     <string name="btn_generate">生成激活码</string>
     <string name="label_result">激活码（Base64URL，可直接输入到宿主激活框）</string>
     <string name="btn_copy">复制激活码</string>
+
+    <string name="hint_expire_hint">当前基准：点“获取当前时间”后可用下方按钮一键累加</string>
 </resources>
