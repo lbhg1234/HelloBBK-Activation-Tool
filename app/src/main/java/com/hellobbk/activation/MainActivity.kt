@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.chip.Chip
@@ -34,8 +35,8 @@ class MainActivity : AppCompatActivity() {
         private const val LONG_TERM_SEC = 4102444800L // 2100-01-01 00:00:00 UTC
     }
 
-    /** 一条保存的私钥记忆 */
-    private data class KeyEntry(val name: String, val pem: String, val pass: String)
+    /** 一条保存的私钥记忆（id 为稳定标识，改名不影响定位） */
+    private data class KeyEntry(val id: String, val name: String, val pem: String, val pass: String)
 
     private val etSn by lazy { findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etSn) }
     private val etKey by lazy { findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etKey) }
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var expiresAtSec: Long = 0L
     private var entries: MutableList<KeyEntry> = mutableListOf()
     private var loadingChips = false
+    private var editingId: String? = null   // 当前正在编辑的私钥 id（null = 新建模式）
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +84,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<android.view.View>(R.id.btnCopy).setOnClickListener { doCopy() }
         findViewById<android.view.View>(R.id.btnSaveKey).setOnClickListener { saveCurrentKey() }
         findViewById<android.view.View>(R.id.btnDeleteKey).setOnClickListener { deleteSelectedKey() }
+        findViewById<android.view.View>(R.id.btnEditKey).setOnClickListener { editSelectedKey() }
+        refreshKeyEditHint()
     }
 
     private fun nowSec(): Long = System.currentTimeMillis() / 1000L
@@ -131,6 +135,9 @@ class MainActivity : AppCompatActivity() {
 
     // ---------- 私钥记忆 ----------
 
+    private fun newId(): String = "k_" + System.currentTimeMillis().toString(36) +
+        "_" + (1000..9999).random().toString()
+
     private fun loadEntries() {
         val raw = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getString(K_KEYSTORE, "") ?: ""
@@ -142,6 +149,7 @@ class MainActivity : AppCompatActivity() {
                 val o = arr.getJSONObject(i)
                 entries.add(
                     KeyEntry(
+                        o.optString("id").ifBlank { "legacy_$i" }, // 兼容旧数据：无 id 时用下标
                         o.optString("name", ""),
                         o.optString("pem", ""),
                         o.optString("pass", "")
@@ -155,14 +163,15 @@ class MainActivity : AppCompatActivity() {
         val arr = JSONArray()
         for (e in entries) {
             val o = JSONObject()
-            o.put("name", e.name); o.put("pem", e.pem); o.put("pass", e.pass)
+            o.put("id", e.id); o.put("name", e.name)
+            o.put("pem", e.pem); o.put("pass", e.pass)
             arr.put(o)
         }
         getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putString(K_KEYSTORE, arr.toString()).apply()
     }
 
-    private fun renderChips(selectedName: String? = null) {
+    private fun renderChips(selectedId: String? = null) {
         loadingChips = true
         chipKeyStore.removeAllViews()
         if (entries.isEmpty()) {
@@ -177,6 +186,8 @@ class MainActivity : AppCompatActivity() {
             for (e in entries) {
                 val chip = Chip(this).apply {
                     text = e.name
+                    id = View.generateViewId()
+                    tag = e.id
                     isCheckable = true
                     isCloseIconVisible = false
                     setChipIconResource(R.drawable.ic_key_24)
@@ -184,10 +195,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 chipKeyStore.addView(chip)
             }
-            if (selectedName != null) {
+            if (selectedId != null) {
                 for (i in 0 until chipKeyStore.childCount) {
                     val chip = chipKeyStore.getChildAt(i) as? Chip ?: continue
-                    if (chip.text == selectedName) {
+                    if (chip.tag == selectedId) {
                         chipKeyStore.check(chip.id)
                         break
                     }
@@ -197,14 +208,39 @@ class MainActivity : AppCompatActivity() {
         loadingChips = false
     }
 
+    /** 载入某条到编辑区并进入编辑模式。 */
     private fun loadKeyEntry(e: KeyEntry) {
         if (loadingChips) return
+        editingId = e.id
         etKey.setText(e.pem)
         etKeyName.setText(e.name)
         etKeyPass.setText(e.pass)
-        toast("已载入「${e.name}」")
+        refreshKeyEditHint()
+        toast("已载入「${e.name}」，可改名后更新")
     }
 
+    /** 点“编辑选中”：把当前勾选的私钥载入编辑区（等同点 chip，但入口更明确）。 */
+    private fun editSelectedKey() {
+        val checkedId = chipKeyStore.checkedChipId
+        if (checkedId == android.view.View.NO_ID) { toast("请先点选要编辑的私钥"); return }
+        val chip = chipKeyStore.findViewById<Chip>(checkedId) ?: return
+        val e = entries.firstOrNull { it.id == chip.tag } ?: return
+        loadKeyEntry(e)
+    }
+
+    /** 根据是否处于编辑模式，更新提示文案与保存按钮文字。 */
+    private fun refreshKeyEditHint() {
+        val editing = editingId != null && entries.any { it.id == editingId }
+        findViewById<android.widget.TextView>(R.id.tvKeyEditHint)
+            .setText(getString(if (editing) R.string.hint_editing_mode else R.string.hint_new_mode))
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.btnSaveKey)
+            .setText(if (editing) R.string.btn_update_key else R.string.btn_save_key)
+    }
+
+    /**
+     * 保存/更新：编辑模式按 id 原地覆盖（改名不会残留旧记录），
+     * 新建模式追加一条。
+     */
     private fun saveCurrentKey() {
         val pem = etKey.text?.toString() ?: ""
         if (pem.isBlank()) { fail("请先粘贴或载入私钥，再保存"); return }
@@ -212,26 +248,44 @@ class MainActivity : AppCompatActivity() {
         if (name.isBlank()) name = "私钥${entries.size + 1}"
         val pass = etKeyPass.text?.toString() ?: ""
 
-        val idx = entries.indexOfFirst { it.name == name }
-        val entry = KeyEntry(name, pem, pass)
-        if (idx >= 0) entries[idx] = entry else entries.add(entry)
-        persistEntries()
-        etKeyName.setText(name)
-        renderChips(name)
-        toast("已保存${if (idx >= 0) "更新" else ""}「$name」")
+        val cur = entries.firstOrNull { it.id == editingId }
+        if (cur != null) {
+            // 原地更新，名称也随之改变
+            val idx = entries.indexOf(cur)
+            entries[idx] = KeyEntry(cur.id, name, pem, pass)
+            persistEntries()
+            etKeyName.setText(name)
+            renderChips(cur.id)
+            toast("已更新「$name」")
+        } else {
+            val id = newId()
+            entries.add(KeyEntry(id, name, pem, pass))
+            editingId = id
+            persistEntries()
+            etKeyName.setText(name)
+            renderChips(id)
+            refreshKeyEditHint()
+            toast("已保存「$name」")
+        }
     }
 
     private fun deleteSelectedKey() {
         val checkedId = chipKeyStore.checkedChipId
         if (checkedId == android.view.View.NO_ID) { toast("请先点选要删除的私钥"); return }
         val chip = chipKeyStore.findViewById<Chip>(checkedId) ?: return
-        val name = chip.text?.toString() ?: return
-        val before = entries.size
-        entries.removeAll { it.name == name }
-        if (entries.size == before) { toast("未找到对应记录"); return }
+        val id = chip.tag as? String ?: return
+        val e = entries.firstOrNull { it.id == id } ?: return
+        entries.remove(e)
+        if (editingId == id) {           // 删除的正是当前编辑项 → 回到新建模式
+            editingId = null
+            etKey.setText("")
+            etKeyName.setText("")
+            etKeyPass.setText("")
+        }
         persistEntries()
         renderChips()
-        toast("已删除「$name」")
+        refreshKeyEditHint()
+        toast("已删除「${e.name}」")
     }
 
     // ---------- 私钥文件 ----------

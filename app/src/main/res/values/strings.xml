@@ -16,8 +16,12 @@
     <string name="hint_key_name">给这把私钥起个名称（自定义）</string>
     <string name="hint_key_pass">私钥密码（可选，加密私钥需填）</string>
     <string name="btn_save_key">保存当前私钥</string>
+    <string name="btn_update_key">更新当前私钥</string>
+    <string name="btn_edit_key">编辑选中</string>
     <string name="btn_delete_key">删除选中</string>
     <string name="keystore_empty">（暂无保存的私钥）</string>
+    <string name="hint_editing_mode">编辑模式：改名称或私钥后点「更新当前私钥」即可原地保存（支持改名）</string>
+    <string name="hint_new_mode">新建模式：填好名称与私钥后点「保存当前私钥」新增</string>
 
     <!-- 到期时间 -->
     <string name="label_expire">到期时间</string>
